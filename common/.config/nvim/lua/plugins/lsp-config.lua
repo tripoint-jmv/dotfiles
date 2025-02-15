@@ -3,20 +3,44 @@ return {
 		"williamboman/mason.nvim",
 		lazy = false,
 		config = function()
-			require("mason").setup()
+			require("mason").setup({
+				ensure_installed = {
+					"clangd",
+					"clang-format",
+					"codelldb",
+				},
+			})
 		end,
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
 		config = function()
 			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "tsserver", "html", "marksman", "gopls", "tailwindcss", "denols" },
+				ensure_installed = {
+					"clangd",
+					"lua_ls",
+					"tsserver",
+					"html",
+					"marksman",
+					"gopls",
+					"tailwindcss",
+					"denols",
+				},
 			})
 		end,
 	},
 	{
 		"neovim/nvim-lspconfig",
 		config = function()
+			-- Define a simple on_attach function (customize as needed)
+			local on_attach = function(client, bufnr)
+				-- Example keybindings (you can expand this)
+				local opts = { noremap = true, silent = true }
+				vim.api.nvim_buf_set_keymap(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+				vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
+				vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
+				vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+			end
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 			local lspconfig = require("lspconfig")
@@ -54,6 +78,34 @@ return {
 				root_dir = lspconfig.util.root_pattern("package.json"),
 				single_file_support = false,
 				capabilities = capabilities,
+			})
+
+			-- C++ LSP
+			lspconfig.clangd.setup({
+				on_attach = function(client, bufnr)
+					client.server_capabilities.signatureHelperProvider = false
+					client.server_capabilities.documentFormattingProvider = false
+					on_attach(client, bufnr)
+				end,
+				capabilities = capabilities,
+				cmd = {
+					"clangd",
+					"--background-index",
+					"--clang-tidy",
+					"--header-insertion=iwyu",
+					"--completion-style=detailed",
+					"--function-arg-placeholders",
+					"--fallback-style=llvm",
+					"--query-driver=/usr/bin/clang++",
+				},
+				root_dir = function(fname)
+					return lspconfig.util.root_pattern("compile_commands.json", "compile_flags.txt", ".git")(fname)
+				end,
+				init_options = {
+					usePlaceholders = true,
+					completeUnimported = true,
+					clangdFileStatus = true,
+				},
 			})
 
 			-- Deno LSP

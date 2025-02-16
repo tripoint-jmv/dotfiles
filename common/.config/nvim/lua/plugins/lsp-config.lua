@@ -42,6 +42,7 @@ return {
 				vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
 			end
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+			capabilities.offsetEncoding = { "utf-16" }
 
 			local lspconfig = require("lspconfig")
 

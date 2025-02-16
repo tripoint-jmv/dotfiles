@@ -1,20 +1,14 @@
 return {
 	{
-		"folke/tokyonight.nvim",
+		"catppuccin/nvim",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			require("tokyonight").setup({
-				style = "night",
-				transparent = true,
-				italic_comments = true,
-				italic_keywords = true,
-				italic_functions = true,
-				italic_variables = true,
-				italic_constants = true,
-				italic_builtins = true,
+			require("catppuccin").setup({
+				flavour = "mocha",
+				transparent_background = true,
 			})
-			vim.cmd([[colorscheme tokyonight]])
+			vim.cmd("colorscheme catppuccin")
 		end,
 	},
 }
